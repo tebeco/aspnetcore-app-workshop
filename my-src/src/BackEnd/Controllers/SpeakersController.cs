@@ -22,23 +22,33 @@ namespace BackEnd.Controllers
 
         // GET: api/Speakers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Speaker>>> GetSpeakers()
+        public async Task<ActionResult<List<ConferenceDTO.SpeakerResponse>>> GetSpeakers()
+
         {
-            return await _context.Speakers.ToListAsync();
+            var speakers = await _context.Speakers.AsNoTracking()
+                                    .Include(s => s.SessionSpeakers)
+                                        .ThenInclude(ss => ss.Session)
+                                    .Select(s => s.MapSpeakerResponse())
+                                    .ToListAsync();
+
+            return speakers;
         }
 
         // GET: api/Speakers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Speaker>> GetSpeaker(int id)
+        public async Task<ActionResult<ConferenceDTO.SpeakerResponse>> GetSpeaker(int id)
         {
-            var speaker = await _context.Speakers.FindAsync(id);
+            var speaker = await _context.Speakers.AsNoTracking()
+                                    .Include(s => s.SessionSpeakers)
+                                        .ThenInclude(ss => ss.Session)
+                                    .SingleOrDefaultAsync(s => s.Id == id);
 
             if (speaker == null)
             {
                 return NotFound();
             }
 
-            return speaker;
+            return speaker.MapSpeakerResponse();
         }
 
         // PUT: api/Speakers/5
