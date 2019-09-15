@@ -26,7 +26,7 @@ namespace FrontEnd.Pages
         {
             Session = await _apiClient.GetSessionAsync(id);
 
-            if(Session == null)
+            if (Session == null)
             {
                 RedirectToPage("/Index");
             }
